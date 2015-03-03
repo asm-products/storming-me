@@ -1,10 +1,9 @@
 var checked = true;
-var credit_text = "Tweeted using Storming.ME";
+var credit_text = ", Tweeted using @squallapp";
 var TCO_LENGTH = 23;
-var IMAGE_LINK_LENGTH = 23;
+var IMAGE_LINK_LENGTH = 40;
 var font = "Lato";
 var timer;
-
 
 rangy.init();
 
@@ -55,7 +54,6 @@ $('.why-btn').click(function() {
   ga('send', 'event', 'Homepage', 'click', 'Why Medium');
 });
 
-
 $('.editable').on('input', function() {
   draw();
 });
@@ -79,13 +77,24 @@ function draw() {
   });
 }
 
-
 $('.tweet-button').click(function() {
   $('.tweet-button').text('Posting tweet...');
   $('.tweetresult').css('display', 'none');
   $('.tweet-button').addClass('disabled');
   ga('send', 'event', 'Dashboard', 'Click', 'Tweet', $('.textBox').text().length);
-  $.post('/tweet', { image: $('#image').attr('src'), message: $('#textArea').val() }, function(data) {
+
+  var title = $('textArea').val();
+  if(title.length === 0) {
+    title = "My Post";
+    console.log("too short");
+    console.log(title);
+  }
+
+  var content = document.getElementById('t').textContent;
+  var htmlcontent = $('#m').html().toString();
+  var author = $('#profileUsername').text();
+
+  $.post('/tweetpost', { image: $('#image').attr('src'), title: String(title), htmlcontent: htmlcontent, content: String(content), author: String(author) }, function(data) {
     $('.tweetresult').css('display', 'block');
     $('.tweetresult').find('.embed').html(data);
     $('.tweet-button').text('Tweet');
@@ -155,14 +164,24 @@ $('#textArea').keyup(function() {
       length += splits[i].length;
     }
   }
-  $('.text-length').text(IMAGE_LINK_LENGTH + length + '/140');
+  $('.text-length').text( length + '/100');
+  if($('#textArea').text().length > 100){
+    $('#textArea').text($('#textArea').text().substring(0,99));
+  }
+
 });
 
+$('#t').keyup(function() {
+  var post_length = $('#t').text().length;
+  if (post_length > 10000) {
+    $('#t').text($('#t').text().substring(0,9999));
+  }
+  $('.post-length').text(post_length +' / 10000');
+});
 
 $(".upload-link").focus(function() {
   this.select();
 });
-
 
 $('.rand-bg-btn').click(function() {
   var color = randomColor({
@@ -172,7 +191,33 @@ $('.rand-bg-btn').click(function() {
   draw();
 });
 
+//Catching this event on the body means that we don't have to re-attach click handlers when swapping ids.
+$("body").on("click", "#follow, #unfollow", function(event) {
+  var btn = $(event.target);
+  var username = btn.attr("data-username");
+  btn.prop("disabled", true);
+  console.log("posting");
+  $.post('/'+username+"/"+btn.attr("id"), {}, function(){
+      btn.toggleClass("btn-info btn-danger").prop("disabled", false);
+      if(btn.hasClass("btn-info")){
+        btn.text("Follow");
+      }else{
+        btn.text("Unfollow");
+      }
+  });
+});
 
-$('.bookmark').click(function(e) {
-  alert('Press ' + (navigator.userAgent.toLowerCase().indexOf('mac') != - 1 ? 'Command/Cmd' : 'CTRL') + ' + D to bookmark this page.');
-}); 
+$('#settings-form').submit(function(e) {
+  $('#success-alert').addClass("hide");
+  $('#error-alert').addClass("hide");
+  var params = $('#settings-form').serializeJSON();
+  $.post('/settings', params, function(data) {
+    if (data.passed) {
+      $('#success-alert').removeClass("hide");
+    } else {
+      $('#error-alert').html(data.errors);
+      $('#error-alert').removeClass("hide");
+    }
+  });
+  e.preventDefault();
+});

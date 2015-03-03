@@ -8,93 +8,64 @@ block content
   .ignore(style="font-family:Lato;")
   .ignore(style="font-family:Merriweather;")
 
-  //- Navbar
-  .navbar.navbar-info
-    .col-lg-6.col-lg-offset-3
-      .navbar-header
-        button.navbar-toggle(type='button', data-toggle='collapse', data-target='.navbar-inverse-collapse')
-          span.icon-bar
-          span.icon-bar
-          span.icon-bar
-        a.navbar-brand(href='javascript:void(0)')
-          | Storming.ME
-          .ripple-wrapper
-      .navbar-collapse.collapse.navbar-inverse-collapse
-        ul.nav.navbar-nav.navbar-right
-          li
-            a(href='https://twitter.com/intent/tweet?text=Storming.ME+-+Hacking+the+Tweetstorm&url=http://storming.me&via=KaranGoel', target='_blank', title="Share on Twitter")
-              span.fa.fa-twitter.fa-2x
-          li
-            a(href='/logout', title="Logout")
-              span.fa.fa-sign-out.fa-2x
+  include navbar
 
-  //- Greeting
-  .col-lg-6.col-lg-offset-3.greeting
-    .bs-component
-      .alert.alert-dismissable
-        button.close(type="button", data-dismiss="alert") ×
-        h4 Getting Started
-        p
-          | Welcome to your dashboard, @#{username}. To get started, simply compose a tweet below. 
-          | The editor is a live preview of what your final image will look like. 
-          | When ready, click the Tweet button and your tweet will be posted.
-        button.btn.btn-primary.btn-raised.bookmark Bookmark Storming.ME
-  
-  //- Tweet text box
-  .col-lg-6.col-lg-offset-3.tweet-text
-    .form-group
-      label.control-label.tweet-title(for="textArea") Tweet
-      .input-group
-        .form-control-wrapper
-          textarea#textArea(rows="2", maxLength="117", tabindex="2", autofocus, placeholder="Introduce your tweetstorm. You can tag @username, paste links or use #hashtags.")
-        .input-group-addon.text-length 23/140
+  .container
+    .row.header
+      include profile_component
 
-  //- Text editor controls
-  .col-lg-6.col-lg-offset-3
-    .row
-      .col-lg-3
-        .form-group.font-checkbox
-          .checkbox
-            label(for="font")
-                input(type="checkbox", id="font")
-                | Serif font
-      .col-lg-3
-        .form-group.credit-checkbox
-          .checkbox
-            label(for="credit")
-                input(type="checkbox", id="credit")
-                | Watermark
-      .col-lg-1
-        a.btn.btn-default.btn-flat.rand-bg-btn(href="javascript:void(0)", title="Random Background Color")
-          i.mdi-av-repeat.random-bg
+      .container.col-lg-8
+        .row.header
+          .col-lg-10.col-lg-offset-1.tweet-text
+           .form-group
+             label.control-label.twwet-title(for="textArea") Title
+             .input-group
+               .form-control-wrapper
+                 textarea#textArea(rows="2", maxLength="117", tabindex="2", autofocus, placeholder="Introduce your tweetstorm. You can tag @username, paste links or use #hashtags.")
+               .input-group-addon.text-length 0/100
 
-  //- Text editor
-  .col-lg-6.col-lg-offset-3
-    .panel.panel-default
-      .panel-body#t
-        .editable.textBox(tabindex="1") Enter your tweetstorm here.. Remember, no character limits.
 
-  //- Tweet button
-  .col-lg-2.col-lg-offset-7
-    .btn-group.pull-right
-      a.btn.btn-info.tweet-button
-        | Tweet
-        .ripple-wrapper
-      a.btn.btn-info.dropdown-toggle(href="javascript:void(0)", data-toggle="dropdown")
-        span.caret
-      ul.dropdown-menu
-        li
-          a.upload-imgur(href="javascript:void(0)") Upload to Imgur
+          .row.col-lg-3.col-lg-offset-1
+            label.control-label.twwet-title(for="textArea") Post
 
+          //- Text editor
+          .row.col-lg-10.col-lg-offset-1
+            .panel.panel-default
+              .panel-body#t
+                .editable.textBox(tabindex="1")#m Write something interesting: without character limits.
+              .label.post-length 54/10000
+
+          //- Tweet button
+          .row.col-lg-3.col-lg-offset-1
+            .btn-group.pull-right
+              a.btn.btn-info.tweet-button
+                | Tweet
+                .ripple-wrapper
+
+          .row.col-lg-10.col-lg-offset-1
+            h3 Your Feed
+            each val in posts
+              .row.header
+                .col-lg-12
+                  .thumbnail.text-center
+                    a(href="/posts/#{val.slug}")
+                      h4 #{val.title}
+
+                    p by&nbsp;
+                      a(href="/#{val.author}")
+                        p @#{val.author}
+                    p.left !{val.content}
 
   //- The result of posting the tweet
   .col-lg-6.col-lg-offset-3.tweetresult
     .bs-component
       .alert.alert-dismissable
         button.close(type="button", data-dismiss="alert") ×
-        h4 You just hacked the tweetstorm.
+        h4 You just hacked the Tweetstorm.
         .embed
 
   img#image(style="display:none")
+  span#profileUsername(style="display:none") #{user.username}
+
 
   include footer

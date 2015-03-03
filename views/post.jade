@@ -1,0 +1,40 @@
+extends layout
+
+block content
+  link(href='/css/style.css', rel='stylesheet')
+  link(href='/css/medium-editor.min.css', rel='stylesheet')
+  link(href='/css/flat.min.css', rel='stylesheet')
+
+  include navbar
+
+  .container
+    .row.header.col-lg-10.col-lg-offset-1
+      .col-lg-12
+        .thumbnail.text-center
+          h1 #{title}
+          p by&nbsp;
+            a(href="#{author_link}") @#{author}
+            p #{post.created_at.toDateString()}
+          #t
+            p !{contents}
+
+          span
+            h5(style="color: rgb(100,100,100)") views #{post.viewCount}
+
+          button.btn.btn-info.followperson
+            span Follow
+              #author_name #{author}
+
+          button.btn.btn-info.sharepost
+            span
+              .fa.fa-twitter.fa-2x(style="color: rgb(29,202,255)")
+              p Share
+
+  img#image(style="display:none")
+
+
+  span#profileUsername(style="display:none") #{author}
+
+
+  include footer
+  script(src='/js/postscripter.js')
