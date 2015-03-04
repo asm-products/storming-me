@@ -98,6 +98,9 @@ router.get('/dashboard', isAuthenticated, function(req, res) {
       f.push(req.user.username)
       avatar_urls[req.user.username] = req.user.photo
       Posts.find({author: { $in : f.getUnique()}}, null, {sort: {date: -1}}, function(err, result) {
+        console.log(c)
+        console.log("UNIQUE USERNAMES", f)
+        console.log("POST RESULTS RAW", result)
         return res.render('dashboard', { user: req.user,
                                             large_photo: req.user.photo.replace(/_normal/i, ''),
                                             posts: result,
@@ -166,7 +169,7 @@ router.post('/posts', isAuthenticated, function(request, response) {
   var author = request.body.author;
   var slug = getSlug(title);
 
-  var max_content_length = 10000;
+  var max_content_length = 3000;
   if (content.length <= max_content_length) {
     var post = new Posts({
       title: title,
@@ -321,7 +324,7 @@ router.post('/tweetpost', isAuthenticated, function(req, res) {
   var slug = getSlug(title);
 
   // CREATE POST OBJECT
-  var max_content_length = 10000;
+  var max_content_length = 3000;
   if (content.length <= max_content_length) {
     var post = new Posts({
       title: title,
