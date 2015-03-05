@@ -41,35 +41,8 @@ var editor = new MediumEditor('.editable', {
   }
 });
 
-
-$('.login-btn').click(function() {
-  ga('send', 'event', 'Homepage', 'click', 'Login');
-});
-
-$('.example-btn').click(function() {
-  ga('send', 'event', 'Homepage', 'click', 'Example');
-});
-
-$('.why-btn').click(function() {
-  ga('send', 'event', 'Homepage', 'click', 'Why Medium');
-});
-
-$('.editable').on('input', function() {
-  draw();
-});
-
-
-$(window).resize(function() {
-  clearTimeout(timer);
-
-  timer = setTimeout(function() {
-    draw();
-  }, 200); // wait for 200ms
-});
-
-
 function draw() {
-  html2canvas(document.getElementById('t'), {
+  html2canvas(document.getElementById('preview'), {
     allowTaint: true,
     onrendered: function(canvas) {
       document.getElementById('image').src = canvas.toDataURL();
@@ -77,52 +50,83 @@ function draw() {
   });
 }
 
-$('.tweet-button').click(function() {
-  $('.tweet-button').text('Posting tweet...');
-  $('.tweetresult').css('display', 'none');
-  $('.tweet-button').addClass('disabled');
-  ga('send', 'event', 'Dashboard', 'Click', 'Tweet', $('.textBox').text().length);
+$(document).ready(function() {
 
-  var title = $('textArea').val();
-  if(title.length === 0) {
-    title = "My Post";
-    console.log("too short");
-    console.log(title);
-  }
+  autosize(document.querySelectorAll('textarea'));
 
-  var content = document.getElementById('t').textContent;
-  var htmlcontent = $('#m').html().toString();
-  var author = $('#profileUsername').text();
-
-  $.post('/tweetpost', { image: $('#image').attr('src'), title: String(title), htmlcontent: htmlcontent, content: String(content), author: String(author) }, function(data) {
-    $('.tweetresult').css('display', 'block');
-    $('.tweetresult').find('.embed').html(data);
-    $('.tweet-button').text('Tweet');
-    $('.tweet-button').removeClass('disabled');
+  // Format date strings
+  $('.post-time').map(function() {
+    var dateString = Date.parse($(this).text());
+    $(this).text(strftime('%b %d, %Y at %I:%M %p', new Date(dateString)));
   });
-});
 
+  $('.post-time-date').map(function() {
+    var dateString = Date.parse($(this).text());
+    $(this).text(strftime('%b %d, %Y', new Date(dateString)));
+  });
 
-$('.upload-imgur').click(function() {
-  $('.tweet-button').text('Uploading image...');
-  $('.tweetresult').css('display', 'none');
-  $('.tweet-button').addClass('disabled');
-  ga('send', 'event', 'Dashboard', 'Click', 'Imgur Upload');
-  $.post('/upload/imgur', { image: $('#image').attr('src') }, function(data) {
-    if (data === 'error') {
-      alert('Could not upload image');
-    } else {
-      $('.tweetresult').css('display', 'block');
-      $('.tweetresult').find('h4').text('Image Uploaded');
-      $('.tweetresult').find('.embed').html(
-          '<div class="form-control-wrapper"><input class="form-control ' +
-          'empty upload-link" readonly value="' + data + '" type="text"><span ' +
-          'class="material-input"></span></div>');
+  $('.login-btn').click(function() {
+    ga('send', 'event', 'Homepage', 'click', 'Login');
+  });
+
+  $('.example-btn').click(function() {
+    ga('send', 'event', 'Homepage', 'click', 'Example');
+  });
+
+  $('.why-btn').click(function() {
+    ga('send', 'event', 'Homepage', 'click', 'Why Medium');
+  });
+
+  $('.editable').on('input', function() {
+    draw();
+  });
+
+  $('.tweet-button').click(function() {
+    $('.tweet-button').text('Posting tweet...');
+    $('.tweetresult').css('display', 'none');
+    $('.tweet-button').addClass('disabled');
+    ga('send', 'event', 'Dashboard', 'Click', 'Tweet', $('.textBox').text().length);
+
+    var title = $('textArea').val();
+    if(title.length === 0) {
+      title = "My Post";
+      console.log("too short");
+      console.log(title);
     }
-    $('.tweet-button').text('Tweet');
-    $('.tweet-button').removeClass('disabled');
+
+    var content = document.getElementById('t').textContent;
+    var htmlcontent = $('#m').html().toString();
+    var author = $('#profileUsername').text();
+
+    $.post('/tweetpost', { image: $('#image').attr('src'), title: String(title), htmlcontent: htmlcontent, content: String(content), author: String(author) }, function(data) {
+      $('.tweetresult').css('display', 'block');
+      $('.tweetresult').find('.embed').html(data);
+      $('.tweet-button').text('Tweet');
+      $('.tweet-button').removeClass('disabled');
+    });
   });
-});
+
+
+  $('.upload-imgur').click(function() {
+    $('.tweet-button').text('Uploading image...');
+    $('.tweetresult').css('display', 'none');
+    $('.tweet-button').addClass('disabled');
+    ga('send', 'event', 'Dashboard', 'Click', 'Imgur Upload');
+    $.post('/upload/imgur', { image: $('#image').attr('src') }, function(data) {
+      if (data === 'error') {
+        alert('Could not upload image');
+      } else {
+        $('.tweetresult').css('display', 'block');
+        $('.tweetresult').find('h4').text('Image Uploaded');
+        $('.tweetresult').find('.embed').html(
+            '<div class="form-control-wrapper"><input class="form-control ' +
+            'empty upload-link" readonly value="' + data + '" type="text"><span ' +
+            'class="material-input"></span></div>');
+      }
+      $('.tweet-button').text('Tweet');
+      $('.tweet-button').removeClass('disabled');
+    });
+  });
 
 
 $('#credit').click(function() {
@@ -133,9 +137,7 @@ $('#credit').click(function() {
   } else {
     $('.panel-body').find('.credit-preview').remove();
   }
-  draw();
 });
-
 
 $('#font').click(function() {
   var $this = $(this);
@@ -148,7 +150,6 @@ $('#font').click(function() {
   $('.panel-body').css('font-family', font);
   draw();
 });
-
 
 $('#textArea').keyup(function() {
   var text = $(this).val();
@@ -164,60 +165,99 @@ $('#textArea').keyup(function() {
       length += splits[i].length;
     }
   }
-  $('.text-length').text( length + '/100');
-  if($('#textArea').text().length > 100){
-    $('#textArea').text($('#textArea').text().substring(0,99));
+
+  $('.text-length').text( length + '/90 characters left');
+  if(length > 90){
+    $('#textArea').text($('#textArea').text().substring(0, 89));
   }
-
+  $('#previewtitle').text($('#textArea').val());
+  draw()
 });
 
-$('#t').keyup(function() {
-  var post_length = $('#t').text().length;
-  if (post_length > 10000) {
-    $('#t').text($('#t').text().substring(0,9999));
-  }
-  $('.post-length').text(post_length +' / 10000');
-});
-
-$(".upload-link").focus(function() {
-  this.select();
-});
-
-$('.rand-bg-btn').click(function() {
-  var color = randomColor({
-     luminosity: 'light'
-  });
-  $('.panel-body').css('background-color', color);
-  draw();
-});
-
-//Catching this event on the body means that we don't have to re-attach click handlers when swapping ids.
-$("body").on("click", "#follow, #unfollow", function(event) {
-  var btn = $(event.target);
-  var username = btn.attr("data-username");
-  btn.prop("disabled", true);
-  console.log("posting");
-  $.post('/'+username+"/"+btn.attr("id"), {}, function(){
-      btn.toggleClass("btn-info btn-danger").prop("disabled", false);
-      if(btn.hasClass("btn-info")){
-        btn.text("Follow");
-      }else{
-        btn.text("Unfollow");
-      }
-  });
-});
-
-$('#settings-form').submit(function(e) {
-  $('#success-alert').addClass("hide");
-  $('#error-alert').addClass("hide");
-  var params = $('#settings-form').serializeJSON();
-  $.post('/settings', params, function(data) {
-    if (data.passed) {
-      $('#success-alert').removeClass("hide");
-    } else {
-      $('#error-alert').html(data.errors);
-      $('#error-alert').removeClass("hide");
+  $('#t').keyup(function() {
+    var post_length = $('#t').text().length;
+    if (post_length > 2000) {
+      $('#t').text($('#t').text().substring(0,1999));
     }
+    $('.post-length').text(post_length +' / 2000 characters left');
+
+    $('#previewcontent').html($('#t').html());
+    draw()
   });
-  e.preventDefault();
+
+  $(".upload-link").focus(function() {
+    this.select();
+  });
+
+  $('.rand-bg-btn').click(function() {
+    var color = randomColor({
+       luminosity: 'light'
+    });
+    $('.panel-body').css('background-color', color);
+  draw()
+
+  });
+
+  //Catching this event on the body means that we don't have to re-attach click handlers when swapping ids.
+  $("body").on("click", "#follow, #unfollow", function(event) {
+    var btn = $(event.target);
+    var username = btn.attr("data-username");
+    btn.prop("disabled", true);
+    $.post('/'+username+"/"+btn.attr("id"), {}, function(){
+        btn.toggleClass("btn-info btn-danger").prop("disabled", false);
+        if(btn.hasClass("btn-info")){
+          btn.text("Follow");
+        }else{
+          btn.text("Unfollow");
+        }
+    });
+  });
+
+$('.followuser').click(function() {
+  console.log('following')
+  var username = $('#profileUsername').text()
+
+  $.post("/"+username+"/follow", function() {
+    console.log('friendship')
+    $('.followuser').text("Followed");
+  });
+
+});
+
+$('.unfollowuser').click(function() {
+  console.log('unfollow')
+  var username = $('#profileUsername').text()
+  console.log("unfollowing");
+  console.log(username);
+  $.post("/"+username+"/unfollow", function() {
+    $('.unfollowuser').text("Unfollowed")
+  });
+});
+
+  $('#settings-form').submit(function(e) {
+    $('#success-alert').addClass("hide");
+    $('#error-alert').addClass("hide");
+    var params = $('#settings-form').serializeJSON();
+    $.post('/settings', params, function(data) {
+      if (data.passed) {
+        $('#success-alert').removeClass("hide");
+      } else {
+        $('#error-alert').html(data.errors);
+        $('#error-alert').removeClass("hide");
+      }
+    });
+    e.preventDefault();
+  });
+})
+
+$('.previewtoggle').click(function() {
+  $('#preview').toggle();
+})
+
+$(window).resize(function() {
+  clearTimeout(timer);
+
+  timer = setTimeout(function() {
+    draw();
+  }, 200); // wait for 200ms
 });

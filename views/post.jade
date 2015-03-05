@@ -1,40 +1,54 @@
 extends layout
 
 block content
-  link(href='/css/style.css', rel='stylesheet')
+  include navbar
   link(href='/css/medium-editor.min.css', rel='stylesheet')
   link(href='/css/flat.min.css', rel='stylesheet')
 
-  include navbar
-
   .container
-    .row.header.col-lg-10.col-lg-offset-1
-      .col-lg-12
-        .thumbnail.text-center
-          h1 #{title}
-          p by&nbsp;
-            a(href="#{author_link}") @#{author}
-            p #{post.created_at.toDateString()}
-          #t
-            p !{contents}
+    .row.header.col-md-10.col-md-offset-1
+      .col-md-12
+        .post-container
+          .post-author
+            a(href="/#{post.author}")
+              img.author-image(src="#{avatar_url}")
+              .author-name #{post.author}
+          .post-body
+            .panel-default
+              .panel-body#preview(style="background:white")
+                h1.post-title #{post.title}
+                .post-content#m !{post.content}
+                .post-attribution.text-center.secondary-text-color
+                  p by #{author_user.name}
+                  p
+                    | Posted 
+                    span.post-time-date #{post.created_at}
+                    |  via @SquallApp
+          .post-footer
+            .post-meta
+              .post-time #{post.created_at}
+              .post-stats
+                span.retweets
+                  strong #{post.viewCount}
+                  |  Views
+            .post-social
+              button.btn.btn-info.followuser
+                span Follow
+                  #author_name #{post.author}
+              button.sharepost.btn.btn-info
+                i.fa.fa-twitter
+                |  Tweet This
+              //
+                .post-share
+                  a(href='#')
+                    i.fa.fa-facebook-official
+                  a(href='#')
+                    i.fa.fa-google-plus-square
+                  a(href='#')
+                    i.fa.fa-pinterest-square
 
-          span
-            h5(style="color: rgb(100,100,100)") views #{post.viewCount}
-
-          button.btn.btn-info.followperson
-            span Follow
-              #author_name #{author}
-
-          button.btn.btn-info.sharepost
-            span
-              .fa.fa-twitter.fa-2x(style="color: rgb(29,202,255)")
-              p Share
 
   img#image(style="display:none")
-
-
-  span#profileUsername(style="display:none") #{author}
-
 
   include footer
   script(src='/js/postscripter.js')

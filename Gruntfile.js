@@ -37,6 +37,8 @@ module.exports = function(grunt) {
                                                 'public/js/medium-editor.min.js',
                                                 'public/js/ripples.min.js',
                                                 'public/js/material.min.js',
+                                                'public/js/strftime-min.js',
+                                                'public/js/autosize.js',
                                                 'public/js/script.js']
         }
       }

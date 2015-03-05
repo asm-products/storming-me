@@ -1,6 +1,7 @@
 extends layout
 
 block content
+  include navbar
   link(href='/css/style.css', rel='stylesheet')
   link(href='/css/medium-editor.min.css', rel='stylesheet')
   link(href='/css/flat.min.css', rel='stylesheet')
@@ -8,53 +9,85 @@ block content
   .ignore(style="font-family:Lato;")
   .ignore(style="font-family:Merriweather;")
 
-  include navbar
-
   .container
     .row.header
       include profile_component
 
-      .container.col-lg-8
-        .row.header
-          .col-lg-10.col-lg-offset-1.tweet-text
-           .form-group
-             label.control-label.twwet-title(for="textArea") Title
-             .input-group
-               .form-control-wrapper
-                 textarea#textArea(rows="2", maxLength="117", tabindex="2", autofocus, placeholder="Introduce your tweetstorm. You can tag @username, paste links or use #hashtags.")
-               .input-group-addon.text-length 0/100
-
-
-          .row.col-lg-3.col-lg-offset-1
-            label.control-label.twwet-title(for="textArea") Post
+      .container.col-md-8.dashboard-feed-container
+        .row.col-md-10.col-md-offset-1
+          .form-group
+            .input-group.squall-title
+              .form-control-wrapper
+               textarea#textArea(rows="1", maxLength="117", tabindex="1", autofocus, placeholder="Title/Tweet. You can tag @username, paste links or use #hashtags.")
+              .input-group-addon
+            .text-length.light-gray 0/90 characters left
 
           //- Text editor
-          .row.col-lg-10.col-lg-offset-1
-            .panel.panel-default
-              .panel-body#t
-                .editable.textBox(tabindex="1")#m Write something interesting: without character limits.
-              .label.post-length 54/10000
+          .panel-default.squall-content
+            .panel-body#t
+              .editable.textBox(tabindex="2", data-placeholder="Create your squall")#m
+          .post-length.light-gray 0/2000 characters left
+
+          a.btn.btn-info.previewtoggle Show preview
 
           //- Tweet button
-          .row.col-lg-3.col-lg-offset-1
-            .btn-group.pull-right
-              a.btn.btn-info.tweet-button
-                | Tweet
-                .ripple-wrapper
+          .btn-group.pull-right
+            a.btn.btn-info.tweet-button(tabindex="3")
+              | Publish
+              .ripple-wrapper
 
-          .row.col-lg-10.col-lg-offset-1
-            h3 Your Feed
-            each val in posts
-              .row.header
-                .col-lg-12
-                  .thumbnail.text-center
-                    a(href="/posts/#{val.slug}")
-                      h4 #{val.title}
 
-                    p by&nbsp;
-                      a(href="/#{val.author}")
-                        p @#{val.author}
-                    p.left !{val.content}
+        .row.col-md-10.col-md-offset-1
+          .panel.panel-body#preview(style="display:none")
+            h1.post-title#previewtitle
+            .post-content#previewcontent
+            .post-attribution.text-center.secondary-text-color
+              p by #{user.name}
+              p
+                | Posted 
+                span.post-time-date #{new Date}
+                |  via @SquallApp
+          img#image(style="display:none")
+
+        .row.col-md-10.col-md-offset-1.dashboard-feed
+          //include leaderboard_component
+          each val, index in posts
+            .row.header
+              .col-lg-12
+                .post-container
+                  .post-author
+                    a(href="/#{val.author}")
+                      img.author-image(src="#{avatar_urls[val.author]}")
+                      .author-name #{val.author}
+                  .post-body.dashboard-post-body
+                    h1.post-title
+                      a(href="/#{val.author}/#{val.slug}")
+                        span #{val.title}
+                     .post-content!= val.content.substring(0,140)+"...."
+                  .post-footer
+                    .post-meta
+                      .post-time #{val.created_at}
+                      .post-stats
+                        span.retweets
+                          strong #{val.viewCount}
+                          |  Views
+                        //
+                          span.favorites
+                            strong 180
+                            |  Favorites
+              //      .post-social
+                //      .tweet-button
+                  //      a(href='#')
+                    //      i.fa.fa-twitter
+                      //    |  Tweet This
+                      //
+                        .post-share
+                          a(href='#')
+                            i.fa.fa-facebook-official
+                          a(href='#')
+                            i.fa.fa-google-plus-square
+                          a(href='#')
+                            i.fa.fa-pinterest-square
 
   //- The result of posting the tweet
   .col-lg-6.col-lg-offset-3.tweetresult
@@ -64,8 +97,7 @@ block content
         h4 You just hacked the Tweetstorm.
         .embed
 
-  img#image(style="display:none")
-  span#profileUsername(style="display:none") #{user.username}
 
+  span#profileUsername(style="display:none") #{user.username}
 
   include footer

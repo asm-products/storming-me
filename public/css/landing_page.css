@@ -1,0 +1,94 @@
+@font-face {
+    font-family: 'Eagle-Book'; /*a name to be used later*/
+    src: url('/fonts/Eagle-Book.otf'); /*URL to font*/
+}
+
+.cta-content {
+}
+
+.cta-container {
+  margin-top: 75px;
+}
+
+body {
+  background-color: #fff;
+  color:#068399;
+}
+
+body, h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4 {
+  font-family: 'Lato';
+}
+
+img.asm-flag {
+  height:14px;
+  margin:-4px 4px 0 0;
+}
+
+.signin-button {
+  margin-top:1.5em;
+}
+
+.pitch {
+  padding-top: 2em;
+  margin-bottom:100px;
+}
+
+.media-body {
+  margin: 1em 0 0;
+  padding-top: 0.5em;
+}
+
+.post-author {
+  margin: 1em 0 0;
+}
+
+.left {
+  width:50%;
+  background:green;
+}
+
+.right {
+  width:50%;
+  background:black;
+}
+
+.footer {
+  display: none;
+}
+
+h1.post-title {
+  font-size:18px;
+}
+
+.post-content p {
+  font-size: 14px;
+}
+
+a.login-btn {
+  background-color: #fff;
+  color:#068399;
+  padding:0.5em 1em;
+  border:#068399 solid 1px;
+}
+
+.assembly-footer {
+  margin-top: 3em;
+  text-transform: uppercase;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+img.brand {
+  padding-top:5%;
+  width:250px;
+  margin-bottom:1em;
+}
+
+.tweet-button-disabled {
+  display: block;
+  color: #2cbbd4;
+  font-size: 16px;
+  padding: 5px 60px;
+  border: 1px solid #2cbbd4;
+  margin: 0 auto;
+}

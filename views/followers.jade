@@ -1,9 +1,7 @@
 extends layout
 
 block content
-
   include navbar
-
   .container
     .row.header
       include profile_component
@@ -18,7 +16,9 @@ block content
                   each val in followers
                     .row.header
                       a(href="/#{val.username}")
-                        p #{val.username}
+                        span
+                          img.author-image(src="#{val.photo}")
+                          p #{val.username}
 
 
 span#profileUsername(style="display:none") #{user.username}

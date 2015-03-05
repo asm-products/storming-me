@@ -1,59 +1,49 @@
 extends layout
 
 block content
-  link(href='/css/style.css', rel='stylesheet')
   link(href='/css/medium-editor.min.css', rel='stylesheet')
   link(href='/css/flat.min.css', rel='stylesheet')
+  link(href='/css/landing_page.css', rel='stylesheet')
 
-  include navbar
-
-  .container
-    .row.header
-      .col-lg-10.col-lg-offset-1
-        .col-lg-6.col-lg-offset-3
-          h1 Squall.io
-
-    .row.header
-      .col-lg-10.col-lg-offset-1
-        p.lead Write down a thought.  Tweet up a storm.  All in one go.
-        col-lg-6.col-lg-offset-3
-          a.btn.btn-info.btn-lg.login-btn(href="/login") Login with Twitter
-
-      .col-lg-6.col-md-6.col-sm-6
-        .well.infobox
-          p.lead-text
-            | The single greatest strength of Twitter has always been its simplicity.
-            | There's a lot to be said in 140 characters. But there's even more that
-            | just needs more space.
-          p.lead-text
-            | Storming.ME allows you to compose a tweet with no character limit and
-            | post it as an image for free.
-          a.btn.btn-default.example-btn(href="https://twitter.com/karangoel/status/546098580096704513", target="_blank", style="margin-right:8px;") Example Tweet
-          a.btn.btn-default.why-btn(href="https://medium.com/five-hundred-words/hacking-the-tweet-stream-52ed63a0731", target="_blank") Why Storming.ME
-    .row
-      .col-lg-4.col-md-4.col-sm-4
-        .panel.panel-default
-          .panel-body
-            h2 No Character Limit
-            i.icon.mdi-action-subject
-            p Compose and post a tweet with
-              b no character limit
-              | . So now get the message across in as many words as it takes.
-      .col-lg-4.col-md-4.col-sm-4
-        .panel.panel-default
-          .panel-body
-            h2 Higher Engagement
-            i.icon.mdi-social-group-add
-            p Tweets with media have proven to be more engaging. Even
-              a(href="https://twitter.com/cdixon/status/535256285500178433", target="_blank") Chris Dixon
-              |  agrees. Tweets created using Storming.ME will be loved by your followers.
-      .col-lg-4.col-md-4.col-sm-4
-        .panel.panel-default
-          .panel-body
-            H2 Fully Responsive
-            i.icon.mdi-hardware-phonelink
-            p Storming.ME has a perfectly responsive dashboard where you can compose your
-              | tweetstorm conveniently on any device.
+  .container.cta-container
+    .row.col-md-10.col-md-offset-1.text-center.cta-content
+      .col-md-6.text-center.pitch
+        img.brand(src="squall.svg")
+        h2 Express yourself on Twitter, with more character
+        h4.secondary-text-color If a picture is worth a thousand words, then a Squall is worth a dozen tweets.
+        h3.signin-button
+          a.btn-lg.login-btn(href="/login") Sign in with Twitter
+        .assembly-footer.light-gray
+          p.light-gray
+            | Built with love on&nbsp;
+            a.light-gray(href="https://assembly.com/squall", target="_blank") 
+              img.asm-flag(src="/asm_flag.svg")
+              | Assembly
+      .col-md-6.sample-squall
+        .post-container
+          .post-body
+            .media
+              .post-author.pull-left
+                img.media-object.author-image(src='/austin.png')
+              .media-body
+                .author-name Austin Smith
+                .post-meta
+                  .post-time #{new Date}
+            h1.post-title
+              span Need more than 140 characters on Twitter? Use Squall.
+            .post-content
+              p Squall is the easiest way to publish on Twitter without hitting that 140 character limit. Write your post, give it a title, and hit publish. It's that simple.
+              p Signup to start sharing your brief thoughts, experiences, and tips. Squall will publish each post as a simple, beautiful image to your Twitter stream for all to read as well as collect them at Squall.io.
+          .post-footer
+            .post-meta
+              .post-time #{new Date}
+              .post-stats
+                span.retweets
+                  strong 90
+                  |  Retweets
+                span.favorites
+                  strong 180
+                  |  Favorites
 
 
   include footer

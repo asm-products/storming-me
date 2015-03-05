@@ -13,6 +13,37 @@ if (process.env.NODE_ENV === 'production') {
 var request = require('request');
 var twit = require('twit');
 
+if (!Array.prototype.map)
+{
+  Array.prototype.map = function(fun /*, thisp*/)
+  {
+    var len = this.length;
+    if (typeof fun != "function")
+      throw new TypeError();
+
+    var res = new Array(len);
+    var thisp = arguments[1];
+    for (var i = 0; i < len; i++)
+    {
+      if (i in this)
+        res[i] = fun.call(thisp, this[i], i, this);
+    }
+
+    return res;
+  };
+}
+Array.prototype.getUnique = function(){
+   var u = {}, a = [];
+   for(var i = 0, l = this.length; i < l; ++i){
+      if(u.hasOwnProperty(this[i])) {
+         continue;
+      }
+      a.push(this[i]);
+      u[this[i]] = 1;
+   }
+   return a;
+}
+
 function isAuthenticated(req, res, next) {
   if (req.isAuthenticated()) {
     console.log("authenticated")
@@ -31,9 +62,7 @@ router.get('/', function(req, res) {
   else {
     return res.render('landing');
   }
-
 });
-
 
 router.get('/login', passport.authenticate('twitter'));
 
@@ -55,13 +84,51 @@ router.get('/profile', isAuthenticated, function(req, res) {
 })
 
 router.get('/dashboard', isAuthenticated, function(req, res) {
-  Posts.find({author: req.user.username}, null, {sort: {date: -1}}, function(err, result) {
-    return res.render('dashboard', { user: req.user,
-                                        large_photo: req.user.photo.replace(/_normal/i, ''),
-                                        posts: result
-                                        });
+  var c = 0;
+  var post_count = Posts.find({author: req.user.username}, function(err, rt) {
+    c = rt.length;
+    Users.find({username: {$in : [req.user.following] }}, function(err, following) {
+      var f = following.map(function(a) {return a.username})
+      var au = following.map(function(b) {return b.photo})
+      var avatar_urls = {}
+      for(i = 0; i < f.length; i++) {
+        avatar_urls[f[i]] = au[i];
+      }
+
+      f.push(req.user.username)
+      avatar_urls[req.user.username] = req.user.photo
+
+      var my_rank = Users.find({}).sort({viewScore: -1}).exec(function(err, userlist) {
+        var g = userlist.map(function(q) {return q.username} );
+        var b = g.indexOf(req.user.username) + 1;
+        Posts.find({author: { $in : f.getUnique()}}, null, {sort: {created_at: -1}}, function(err, result) {
+          console.log(b)
+          return res.render('dashboard', { user: req.user,
+                                              large_photo: req.user.photo.replace(/_normal/i, ''),
+                                              posts: result,
+                                              post_count: c,
+                                              avatar_urls: avatar_urls,
+                                              rank: b
+                                              });
+        })
+      })
+    })
   })
 });
+
+router.get('/leaderboard', function(req, res) {
+  var top_users = Users.find({}).sort({viewScore: -1}).limit(100).exec(function(err, leaders) {
+    if (leaders) {
+      var p=0;
+    }
+    else {
+      leaders = [];
+    }
+    res.render('leaderboard', {
+      leaders: leaders
+    })
+})
+})
 
 router.get('/settings', isAuthenticated, function(req, res) {
   return res.render('user_settings', { user: req.user });
@@ -76,40 +143,6 @@ router.post('/settings', isAuthenticated, function(req, res) {
   return res.json({passed: true});
 });
 
-router.get('/posts/:post_id', function(request, response, next) {
-  var post_id = request.params.post_id;
-  var post = Posts.findOne({slug: post_id},
-    function(err, result) {
-      if (err) {
-        response.json({status: "No Post Found"});
-      }
-      else {
-        if (result)
-          {
-            var title = result.title;
-            var author = result.author;
-            var contents = result.content;
-            var author_link = '../'+author;
-
-            if (isNaN(result.viewCount)) {
-              var newViewCount = 1;
-            }
-            else {
-              var newViewCount = result.viewCount + 1;
-            }
-
-            result.update({viewCount: newViewCount});
-
-            response.render('post', {title: title, contents: contents, author: author, author_link: author_link, post: result});
-          }
-        else {
-          //return error page
-          response.redirect('/error');
-        }
-      }
-  });
-});
-
 router.get('/error', function(req, res) {
   return res.render('squall');
 })
@@ -120,7 +153,7 @@ router.post('/posts', isAuthenticated, function(request, response) {
   var author = request.body.author;
   var slug = getSlug(title);
 
-  var max_content_length = 10000;
+  var max_content_length = 2000;
   if (content.length <= max_content_length) {
     var post = new Posts({
       title: title,
@@ -150,6 +183,8 @@ router.post('/posts', isAuthenticated, function(request, response) {
 });
 
 router.post('/twitter/createfriendship', isAuthenticated, function(req, res) {
+  console.log("creating friendship with ")
+  console.log(req.body.username)
   var T = new twit({
     consumer_key: constants.Twitter.KEY,
     consumer_secret: constants.Twitter.SECRET,
@@ -166,18 +201,6 @@ router.post('/twitter/createfriendship', isAuthenticated, function(req, res) {
   });
 })
 
-router.get('/newsfeed', isAuthenticated, function(req, res) {
-    var followed_user_ids = req.user.following
-    console.log(followed_user_ids)
-
-    Posts.find({author: followed_user_ids}, function(err, result) {
-      return res.render('newsfeed', { user: req.user,
-                                          large_photo: req.user.photo.replace(/_normal/i, ''),
-                                          posts: result
-                                          });
-    })
-});
-
 router.get('/:username/followers', function(req, res, next) {
   var username = req.params.username
   var currentUser = null;
@@ -185,82 +208,89 @@ router.get('/:username/followers', function(req, res, next) {
       currentUser = req.user;
   }
 
-  Users.findOne({ username : username }, function(err, existingUser) {
-    if (existingUser) {
-      Posts.find({author: existingUser.username}, null, {sort: {date: -1}}, function (err, posts) {
-        var title = existingUser.name + " (@" + existingUser.username + ")";
-        var description = title + " profile page";
-        var image = existingUser.photo.replace(/_normal/i, '')
-        var url = constants.BaseUrl + "/" + username;
+  var post_count = Posts.find({author: req.user.username}, function(err, rt) {
+    c = rt.length;
 
-        var followers = Users.find({ following : { $in : [username] }}, function(err, followers) {
+    var my_rank = Users.find({}).sort({viewScore: -1}).exec(function(err, userlist) {
+      var g = userlist.map(function(q) {return q.username} );
+      var b = g.indexOf(req.user.username) + 1;
 
-          return res.render('followers', { user: existingUser,
-            followers: followers,
-            large_photo: image,
-            posts: posts,
-            currentUser: currentUser,
-            title: title,
-            description: description,
-            image: image,
-            url: url,
-            twitterCreator: "@" + username,
-            openGraphType: "profile",
-            ogOtherData: {
-              "profile:username": username,
-            }
+      Users.findOne({ username : username }, function(err, existingUser) {
+        if (existingUser) {
+          Posts.find({author: existingUser.username}, null, {sort: {date: -1}}, function (err, posts) {
+            var title = existingUser.name + " (@" + existingUser.username + ")";
+            var description = title + " profile page";
+            var image = existingUser.photo.replace(/_normal/i, '')
+            var url = constants.BaseUrl + "/" + username;
+
+            var followers = Users.find({ following : { $in : [username] }}, function(err, followers) {
+
+              return res.render('followers', { user: existingUser,
+                followers: followers,
+                large_photo: image,
+                posts: posts,
+                currentUser: currentUser,
+                title: title,
+                description: description,
+                image: image,
+                url: url,
+                twitterCreator: "@" + username,
+                openGraphType: "profile",
+                ogOtherData: {
+                  "profile:username": username,
+                },
+                rank: b,
+                post_count: c
+              });
+            })
           });
-        })
-
+        }
+        if (err) {
+          // something bad happened
+          return done(err);
+        }
       });
-    }
+    })
 
-    if (err) {
-      // something bad happened
-      return done(err);
-    }
-  });
+  })
+
+
 })
 
 router.get('/:username/following', function(req,res,next) {
-  var username = req.params.username
-  var currentUser = null;
-  if(req.isAuthenticated()){
-      currentUser = req.user;
-  }
+    var username = req.params.username
+    var currentUser = null;
+    if(req.isAuthenticated()){
+        currentUser = req.user;
+    }
 
-  Users.findOne({ username : username }, function(err, existingUser) {
-    if (existingUser) {
-      Posts.find({author: existingUser.username}, null, {sort: {date: -1}}, function (err, posts) {
-        var title = existingUser.name + " (@" + existingUser.username + ")";
-        var description = title + " profile page";
-        var image = existingUser.photo.replace(/_normal/i, '')
-        var url = constants.BaseUrl + "/" + username;
-
-        return res.render('following', { user: existingUser,
-          following: existingUser.following,
-          large_photo: image,
-          posts: posts,
-          currentUser: currentUser,
-          title: title,
-          description: description,
-          image: image,
-          url: url,
-          twitterCreator: "@" + username,
-          openGraphType: "profile",
-          ogOtherData: {
-            "profile:username": username,
+    var post_count = Posts.find({author: req.user.username}, function(err, rt) {
+      c = rt.length;
+      var my_rank = Users.find({}).sort({viewScore: -1}).exec(function(err, userlist) {
+        var g = userlist.map(function(q) {return q.username} );
+        var b = g.indexOf(req.user.username) + 1;
+        Users.findOne({ username : username }, function(err, existingUser) {
+          if (existingUser) {
+            Users.find({username: {$in : [existingUser.following] }}, function(err, following) {
+              return res.render('following',
+                { user: existingUser,
+                  following: following,
+                  large_photo: existingUser.photo,
+                  rank: b,
+                  post_count: c})
+            })
+          if (err) {
+            // something bad happened
+            console.log(err);
+            return done(err);
           }
-        });
+        };
+        })
+      })
 
-      });
-    }
+    })
 
-    if (err) {
-      // something bad happened
-      return done(err);
-    }
-  });
+
 })
 
 router.post('/tweetpost', isAuthenticated, function(req, res) {
@@ -272,11 +302,11 @@ router.post('/tweetpost', isAuthenticated, function(req, res) {
   var slug = getSlug(title);
 
   // CREATE POST OBJECT
-  var max_content_length = 10000;
+  var max_content_length = 2000;
   if (content.length <= max_content_length) {
     var post = new Posts({
       title: title,
-      content: String(content),
+      content: String(htmlcontent),
       author: author,
       slug: slug,
       viewCount: 0
@@ -285,11 +315,11 @@ router.post('/tweetpost', isAuthenticated, function(req, res) {
   }
 
   //CONSTRUCT MESSAGE
-  var url = "http://squall.io/posts/" + slug;
+  var url = "http://squall.io/"+author+"/" + slug;
   console.log(url);
   var end_message = url + " sent via @Squallapp"
   console.log(end_message)
-  var n = 138- url.length - end_message.length
+  var n = 90;
   console.log(n)
   var message = title;
   if (message.length>n) {
@@ -410,36 +440,52 @@ router.get('/:username', function(req, res, next) {
       currentUser = req.user;
   }
 
-  Users.findOne({ username : username }, function(err, existingUser) {
-    if (existingUser) {
-      Posts.find({author: existingUser.username}, null, {sort: {date: -1}}, function (err, posts) {
-        var title = existingUser.name + " (@" + existingUser.username + ")";
-        var description = title + " profile page";
-        var image = existingUser.photo.replace(/_normal/i, '')
-        var url = constants.BaseUrl + "/" + username;
+  var post_count = Posts.find({author: username}, function(err, rt) {
+    c = rt.length;
+    var my_rank = Users.find({}).sort({viewScore: -1}).exec(function(err, userlist) {
+      var g = userlist.map(function(q) {return q.username} );
+      var b = g.indexOf(username) + 1;
+      Users.findOne({ username : username }, function(err, existingUser) {
+        if (existingUser) {
+          Posts.find({author: existingUser.username}, null, {sort: {created_at: -1}}, function (err, posts) {
+            var title = existingUser.name + " (@" + existingUser.username + ")";
+            var description = title + " profile page";
+            var image = existingUser.photo.replace(/_normal/i, '')
+            var url = constants.BaseUrl + "/" + username;
 
-        return res.render('user_profile', { user: existingUser,
-          large_photo: image,
-          posts: posts,
-          currentUser: currentUser,
-          title: title,
-          description: description,
-          image: image,
-          url: url,
-          twitterCreator: "@" + username,
-          openGraphType: "profile",
-          ogOtherData: {
-            "profile:username": username,
-          }
-        });
+            return res.render('user_profile', { user: existingUser,
+              large_photo: image,
+              posts: posts,
+              currentUser: currentUser,
+              title: title,
+              description: description,
+              image: image,
+              url: url,
+              twitterCreator: "@" + username,
+              openGraphType: "profile",
+              ogOtherData: {
+                "profile:username": username,
+              },
+              rank: b,
+              post_count: c
+            });
+          });
+        }
+
+        if (err) {
+          // something bad happened
+          return done(err);
+        }
       });
-    }
 
-    if (err) {
-      // something bad happened
-      return done(err);
-    }
-  });
+
+    })
+
+  })
+
+
+
+
 });
 
 router.post('/:username/follow', isAuthenticated, function(req, res, next) {
@@ -459,12 +505,27 @@ router.post('/:username/follow', isAuthenticated, function(req, res, next) {
           }
           return res.json({message: "Following @"+username});
       });
+
+      var T = new twit({
+        consumer_key: constants.Twitter.KEY,
+        consumer_secret: constants.Twitter.SECRET,
+        access_token: req.user.access_token,
+        access_token_secret: req.user.access_token_secret
+      });
+
+      T.post('friendships/create', {
+        screen_name: username
+      }, function(err, data, response) {
+        if (err) {
+          console.log(err)
+        }
+      });
+
     }
 
     else {
       return res.status(404).json({message: "User @"+username+" Not Found"});
     }
-
   });
 });
 
@@ -493,5 +554,54 @@ router.post('/:username/unfollow', isAuthenticated, function(req, res, next) {
 
   });
 });
+
+router.get('/:username/:post_id', function(request, response) {
+  var post_id = request.params.post_id;
+  var username = request.params.username
+
+  var user = Users.findOne({username: username}, function (err, u) {
+    if (u) {
+      var avatar_url = u.photo;
+
+      u.addView();
+
+      var post = Posts.findOne({slug: post_id, author: username}, function(err, result) {
+        if (err) {
+          console.log(err);
+          response.redirect('/error');
+        }
+        else {
+          if (result)
+            {
+              var title = result.title;
+              var author = result.author;
+              var contents = result.content;
+              var author_link = '../'+author;
+              var author_user = u;
+
+              if (isNaN(result.viewCount)) {
+                var newViewCount = 1;
+              }
+              else {
+                var newViewCount = result.viewCount + 1;
+              }
+              result.viewCount = newViewCount;
+              result.save();
+
+              response.render('post', {author_user: author_user, avatar_url: avatar_url, title: title, contents: contents, author: author, author_link: author_link, post: result});
+            }
+            else {
+              //return error page
+              response.redirect('/error');
+            }
+        }
+      })
+    }
+    else{
+      response.redirect('/error');
+    }
+  })
+
+})
 
 module.exports = router;
