@@ -41,11 +41,12 @@ var editor = new MediumEditor('.editable', {
   }
 });
 
-function draw() {
+function draw(callback) {
   html2canvas(document.getElementById('preview'), {
     allowTaint: true,
     onrendered: function(canvas) {
       document.getElementById('image').src = canvas.toDataURL();
+      callback();
     }
   });
 }
@@ -82,28 +83,32 @@ $(document).ready(function() {
   });
 
   $('.tweet-button').click(function() {
-    $('.tweet-button').text('Posting tweet...');
-    $('.tweetresult').css('display', 'none');
-    $('.tweet-button').addClass('disabled');
-    ga('send', 'event', 'Dashboard', 'Click', 'Tweet', $('.textBox').text().length);
 
-    var title = $('textArea').val();
-    if(title.length === 0) {
-      title = "My Post";
-      console.log("too short");
-      console.log(title);
-    }
+    toggler(function() {
+      $('.tweet-button').text('Tweet Posted');
+      $('.tweetresult').css('display', 'none');
+      $('.tweet-button').addClass('disabled');
+      ga('send', 'event', 'Dashboard', 'Click', 'Tweet', $('.textBox').text().length);
 
-    var content = document.getElementById('t').textContent;
-    var htmlcontent = $('#m').html().toString();
-    var author = $('#profileUsername').text();
+      var title = $('textArea').val();
+      if(title.length === 0) {
+        title = "My Post";
+        console.log("too short");
+        console.log(title);
+      }
 
-    $.post('/tweetpost', { image: $('#image').attr('src'), title: String(title), htmlcontent: htmlcontent, content: String(content), author: String(author) }, function(data) {
-      $('.tweetresult').css('display', 'block');
-      $('.tweetresult').find('.embed').html(data);
-      $('.tweet-button').text('Tweet');
-      $('.tweet-button').removeClass('disabled');
-    });
+      var content = document.getElementById('t').textContent;
+      var htmlcontent = $('#m').html().toString();
+      var author = $('#profileUsername').text();
+
+      $.post('/tweetpost', { image: $('#image').attr('src'), title: String(title), htmlcontent: htmlcontent, content: String(content), author: String(author) }, function(data) {
+        $('.tweetresult').css('display', 'block');
+        $('.tweetresult').find('.embed').html(data);
+        $('.tweet-button').text('Tweet');
+        $('.tweet-button').removeClass('disabled');
+      });
+    })
+
   });
 
 
@@ -166,9 +171,9 @@ $('#textArea').keyup(function() {
     }
   }
 
-  $('.text-length').text( length + '/90 characters left');
-  if(length > 90){
-    $('#textArea').text($('#textArea').text().substring(0, 89));
+  $('.text-length').text( length + '/60 characters left');
+  if(length > 60){
+    $('#textArea').text($('#textArea').text().substring(0, 59));
   }
   $('#previewtitle').text($('#textArea').val());
   draw()
@@ -249,6 +254,15 @@ $('.unfollowuser').click(function() {
     e.preventDefault();
   });
 })
+
+function toggler(callback) {
+  $('#preview').show(function() {
+    draw(function() {
+      callback();
+    });
+
+  });
+}
 
 $('.previewtoggle').click(function() {
   $('#preview').toggle();
