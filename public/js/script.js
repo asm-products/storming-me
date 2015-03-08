@@ -4,6 +4,7 @@ var TCO_LENGTH = 23;
 var IMAGE_LINK_LENGTH = 40;
 var font = "Lato";
 var timer;
+var app_user = 'SquallApp';
 
 rangy.init();
 
@@ -45,7 +46,7 @@ var editor = new MediumEditor('.editable', {
 function draw(callback) {
   console.log('draw(callback) ');
   $('#image-header-title').text($('#textArea').val());
-  
+
   //TODO include moment.js for datetime
   //TODO make sure user time is correctish by using server time
   var temp_d = new Date();
@@ -64,14 +65,13 @@ function draw(callback) {
 	      document.getElementById('image').src = canvas.toDataURL();
 	      $('#image-container').css('display','none');
 	      if(callback){
-	    	  callback();  
+	    	  callback();
 	    	  console.log('callback called');
 	      }
 	      else{
 	    	  console.log('no callback ');
 	      }
-          
-	    }
+      }
 	  });
     }
   });
@@ -111,7 +111,7 @@ $(document).ready(function() {
 //  });
 
   $('.tweet-button').click(function() {
-	
+
 	draw(function(){
 		toggler(function() {
 	      $('.tweet-button').text('Tweet Posted');
@@ -138,13 +138,13 @@ $(document).ready(function() {
 	      });
 	    });
 	});
-    
+
 
   });
 
 
   $('.upload-imgur').click(function() {
-	  
+
 	draw( function(){
 		$('.tweet-button').text('Uploading image...');
 	    $('.tweetresult').css('display', 'none');
@@ -165,7 +165,7 @@ $(document).ready(function() {
 	      $('.tweet-button').removeClass('disabled');
 	    });
 	});
-	
+
   });
 
 
@@ -278,7 +278,7 @@ $('.unfollowuser').click(function() {
     $('#success-alert').addClass("hide");
     $('#error-alert').addClass("hide");
     var params = $('#settings-form').serializeJSON();
-    
+
     $.post('/settings', params, function(data) {
       if (data.passed) {
         $('#success-alert').removeClass("hide");
@@ -289,8 +289,44 @@ $('.unfollowuser').click(function() {
     });
     e.preventDefault();
   });
-  
-  
+
+$('#start-form').submit(function(e) {
+	$('#success-alert').addClass("hide");
+	$('#error-alert').addClass("hide");
+	var params = $('#start-form').serializeJSON();
+
+	var redirectSuccess = function() {
+		$('#success-alert').removeClass("hide").html('Thank you, you\'ll be ' +
+			'redirected to the dashboard in 3 seconds ');
+		setTimeout(function() {
+			window.location = '/';
+		}, 3000);
+	};
+	var failMessage = function(data) {
+		$('#error-alert').html(data.errors);
+		$('#error-alert').removeClass("hide");
+	};
+	if (!params.email) {
+		failMessage({errors: 'To keep you up to date, enter your email address'});
+	} else {
+		$.post('/settings', params, function(data) {
+			if (data.passed) {
+				if (params.follow_app) {
+					$.post("/twitter/createfriendship", {
+						username: app_user
+					}).done(redirectSuccess).fail(failMessage);
+				} else {
+					redirectSuccess();
+				}
+			} else {
+				failMessage(data);
+			}
+		})
+
+  }
+	e.preventDefault();
+});
+
   //getting avatar uri by ajax
   //TODO handle errors in AJAX
   $.ajax('./avatar_uri').done(function(data){
@@ -299,7 +335,7 @@ $('.unfollowuser').click(function() {
   // filling the header of the image to be tweeted, fixing issues of floats
   var image_header_name = $('#image-header-name');
   image_header_name.html(image_header_name.text().replace(/ /g,'&nbsp;'));
-  
+
 })
 
 function toggler(callback) {

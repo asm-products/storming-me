@@ -85,6 +85,10 @@ router.get('/profile', isAuthenticated, function(req, res) {
 
 router.get('/dashboard', isAuthenticated, function(req, res) {
   var c = 0;
+  if(!req.user.email_address) {
+    res.redirect('/start');
+  }
+
   var post_count = Posts.find({author: req.user.username}, function(err, rt) {
     c = rt.length;
     Users.find({username: {$in : [req.user.following] }}, function(err, following) {
@@ -130,17 +134,17 @@ router.get('/avatar_uri', isAuthenticated, function(req, res) {
 	};
 	//TODO cache in redis or mongodb
 	request(options, function(error, response, body) {
-		
+
 		if (!error && response.statusCode == 200 ) {
 			return res.send("data:" + response['headers']['content-type'] + ";base64,"+ (new Buffer(body.toString(), "binary")).toString("base64"));
 		  }
 		else{
 			return res.status(404).send(404, '404 Not Found');
-			
+
 		}
 	  });
-  
-  
+
+
 });
 
 
@@ -162,26 +166,28 @@ router.get('/leaderboard', function(req, res) {
 
 router.get('/settings', isAuthenticated, function(req, res) {
   return res.render('user_settings', { user: req.user });
-
 });
+
+router.get('/start', isAuthenticated, function(req, res) {
+  return res.render('start');
+})
 
 router.post('/settings', isAuthenticated, function(req, res) {
   req.user.email_address = req.body.email;
-  req.user.alert_when_friends_join = req.body.alert_when_friends_join;
-  req.user.alert_when_follow = req.body.alert_when_follow;
+  //Fix for strange value of material design checkboxes
+  req.user.alert_when_friends_join = (req.body.alert_when_friends_join == 'on');
+  req.user.alert_when_follow = (req.body.alert_when_follow == 'on');
 
   var new_username = req.body.username;
 
-  if (!new_username) {
-    return res.json({errors: ['Username cannot be empty.']});
+   if (!new_username || new_username === req.user.username) {
+    req.user.save();
+    return res.json({passed: true});
   }
+
 
   if (req.user.old_username) {
     return res.json({errors: ['Username cannot be changed more than once.']});
-  }
-
-  if (new_username === req.user.username) {
-    return res.json({errors: ['New Username cannot be same as existing username.']});
   }
 
   // make sure new username is available
@@ -256,7 +262,11 @@ router.post('/twitter/createfriendship', isAuthenticated, function(req, res) {
     screen_name: req.body.username
   }, function(err, data, response) {
     if (err) {
-      console.log(err)
+      console.log(err);
+      return res.json({success: false, message: "An error occured while following the user"});
+    } else {
+      return res.json({success: true, message: "Sucessfully followed the user"});
+
     }
   });
 })
