@@ -197,9 +197,16 @@ img.asm-flag {
 }
 
 .signin-button {
-  position: relative;
+  position: center;
   top: 50%;
     -webkit-transform: translateY(-50%);
     -ms-transform: translateY(-50%);
     transform: translateY(-50%);
+}
+
+a.login-btn {
+  background-color: #fff;
+  color:#068399;
+  padding:0.5em 1em;
+  border:#068399 solid 1px;
 }
