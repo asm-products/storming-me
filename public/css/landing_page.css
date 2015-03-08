@@ -1,22 +1,194 @@
-@font-face {
-    font-family: 'Eagle-Book'; /*a name to be used later*/
-    src: url('/fonts/Eagle-Book.otf'); /*URL to font*/
-}
-
-.cta-content {
-}
-
-.cta-container {
-  margin-top: 75px;
-}
+@import url(http://fonts.googleapis.com/css?family=Lato);
+@import url(http://fonts.googleapis.com/css?family=Merriweather);
 
 body {
-  background-color: #fff;
-  color:#068399;
+  font-size: 16px;
+  background-color:#fff;
 }
 
-body, h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4 {
-  font-family: 'Lato';
+/*.editable:empty:not(:focus):before{
+  content: attr(data-ph);
+  color: rgba(0, 0, 0, .4);
+}*/
+
+.medium-editor-placeholder:after {
+  position: absolute;
+  top: 0;
+  left: 0;
+  content: attr(data-placeholder)!important;
+  font-style: normal !important;
+  color:#b6b6b6 !important;
+}
+
+.container-full {
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* COLORS */
+.brand-color {
+  color: #2cbbd4;
+}
+
+.primary-text-color {
+  color: #1f1f1f;
+}
+
+.secondary-text-color {
+  color: #717171;
+}
+
+.light-gray {
+  color: #b6b6b6;
+}
+
+h1.post-title > a {
+  color:#2cbbd4;
+}
+
+.highlight {
+  background-color: #CCDDED;
+}
+
+.greeting {
+  margin-bottom: 50px;
+}
+
+.navbar {
+  background-color: #2cbbd4;
+}
+
+.tweet-text {
+  margin-bottom: 30px;
+}
+
+.tweet-button:focus {
+  border:solid 2px #717171;
+}
+
+.tweet-title {
+  margin: 0 0 10px 5px;
+}
+
+.dashboard-feed-container {
+  padding-top: 4em;
+}
+
+.dashboard-feed {
+  margin-top: 4em;
+}
+
+.dashboard-post-body p{
+  font-size:0.8em;
+  line-height: 1.5em;
+  margin-bottom: 2px;
+}
+
+.dashboard-post-body h1{
+  font-size:1.75em;
+}
+
+#textArea {
+  display: block;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  padding: 6px;
+  width: 100%;
+  height: auto;
+  resize: vertical;
+  border:none;
+  padding: 0.5em;
+}
+
+.squall-title {
+  border-bottom: 1px solid #b6b6b6;
+}
+
+#textArea:focus {
+  outline: 0;
+}
+
+.rand-bg-btn {
+  margin: 0;
+}
+
+.random-bg {
+  font-size: 30px;
+}
+
+a.btn.btn-default.btn-flat.rand-bg-btn {
+  padding: 4px 20px;
+  margin-top: 4px;
+}
+
+a:hover {
+  text-decoration: none;
+}
+
+.textBox {
+  margin-bottom: 40px;
+  min-height: 50px;
+}
+
+.squall-content {
+  border:none;
+  border-bottom: 1px solid #b6b6b6;
+}
+
+.squall-content > .panel-body {
+  padding: 0em 0.9em;
+}
+
+
+.footer {
+  margin-top: 80px;
+  text-align: center;
+}
+
+.panel-body {
+  font-family: "Lato", sans-serif;
+  background-color: #fff;
+  line-height: 25px;
+  padding: 30px;
+}
+
+.credit-preview {
+  float: right;
+  font-size: 14px;
+}
+
+.tweetresult {
+  margin-top: 50px;
+  display: none;
+}
+
+.normal-font-size {
+  font-size:1.5em;
+}
+
+.big-number{
+    font-size:2em;
+}
+
+.big-number-label{
+    color: #AAA;
+    font-weight:100;
+}
+
+.huge-number{
+    font-size:3em;
+}
+
+.edge-right{
+    border-right:1px solid #AAA;
+}
+
+.edge-bottom{
+    border-bottom:1px solid #AAA;
+}
+
+.bottom-margin{
+    margin-bottom:2em;
 }
 
 img.asm-flag {
@@ -26,75 +198,4 @@ img.asm-flag {
 
 .signin-button {
   margin-top:1.5em;
-}
-
-.pitch {
-  padding-top: 7em;
-
-  margin-bottom:100px;
-}
-
-.media-body {
-  margin: 1em 0 0;
-  padding-top: 0.5em;
-}
-
-.post-author {
-  margin: 1em 0 0;
-}
-
-.left {
-  width:50%;
-  background:green;
-}
-
-.right {
-  width:50%;
-  background:black;
-}
-
-.footer {
-  display: none;
-}
-
-h1.post-title {
-  font-size:18px;
-}
-
-.post-content p {
-  font-size: 14px;
-}
-
-a.login-btn {
-  background-color: #fff;
-  color:#068399;
-  padding:0.5em 1em;
-  border:#068399 solid 1px;
-}
-
-.assembly-footer {
-  margin-top: 3em;
-  text-transform: uppercase;
-  font-weight: bold;
-  font-size: 14px;
-}
-
-img.brand {
-  padding-top:5%;
-  width:250px;
-  margin-bottom:1em;
-}
-
-.tweet-button-disabled {
-  display: block;
-  color: #2cbbd4;
-  font-size: 16px;
-  padding: 5px 60px;
-  border: 1px solid #2cbbd4;
-  margin: 0 auto;
-}
-
-iframe#twitter-widget-0.twitter-tweet.twitter-tweet-rendered{
-    box-shadow: none !important;
-    border: none !important;
 }
