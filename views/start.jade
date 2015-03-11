@@ -1,0 +1,39 @@
+extends layout
+
+block content
+
+  link(href='/css/style.css', rel='stylesheet')
+  link(href='/css/flat.min.css', rel='stylesheet')
+  include navbar
+
+  .container
+    .row.header
+      .col-lg-8.col-lg-offset-2
+        h2.form-signin-heading Only one small step
+        |Before starting with Squall, we only need these details to keep you up to date.
+        |Your data is secure and you are always able to change these.
+
+
+        .alert.alert-danger.hide#error-alert(role="alert")
+        .alert.alert-success.hide#success-alert(role="alert")
+
+        form#start-form
+          .form-group
+            label(for='email') Email address
+            input#email.form-control(type='email', placeholder='Enter email', name="email")
+          .checkbox
+            label
+              input(type='checkbox', name='alert_when_friends_join')
+              |  Alert me when a friend joins
+          .checkbox
+            label
+              input(type='checkbox', name='alert_when_follow')
+              |  Alert me when someone follows me
+          .checkbox
+            label
+              input(type='checkbox', name='follow_app')
+              |  Follow @SquallApp on Twitter
+
+          button.btn.btn-default.save-settings-button(type='submit') Start using Squall
+
+  include footer

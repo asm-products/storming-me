@@ -4,6 +4,7 @@ var TCO_LENGTH = 23;
 var IMAGE_LINK_LENGTH = 40;
 var font = "Lato";
 var timer;
+var app_user = 'SquallApp';
 
 rangy.init();
 
@@ -70,8 +71,7 @@ function draw(callback) {
 	      else{
 	    	  console.log('no callback ');
 	      }
-  
-	    }
+      }
 	  });
     }
   });
@@ -316,6 +316,42 @@ $('.unfollowuser').click(function() {
     e.preventDefault();
   });
 
+$('#start-form').submit(function(e) {
+	$('#success-alert').addClass("hide");
+	$('#error-alert').addClass("hide");
+	var params = $('#start-form').serializeJSON();
+
+	var redirectSuccess = function() {
+		$('#success-alert').removeClass("hide").html('Thank you, you\'ll be ' +
+			'redirected to the dashboard in 3 seconds ');
+		setTimeout(function() {
+			window.location = '/';
+		}, 3000);
+	};
+	var failMessage = function(data) {
+		$('#error-alert').html(data.errors);
+		$('#error-alert').removeClass("hide");
+	};
+	if (!params.email) {
+		failMessage({errors: 'To keep you up to date, enter your email address'});
+	} else {
+		$.post('/settings', params, function(data) {
+			if (data.passed) {
+				if (params.follow_app) {
+					$.post("/twitter/createfriendship", {
+						username: app_user
+					}).done(redirectSuccess).fail(failMessage);
+				} else {
+					redirectSuccess();
+				}
+			} else {
+				failMessage(data);
+			}
+		})
+
+  }
+	e.preventDefault();
+});
 
   //getting avatar uri by ajax
   //TODO handle errors in AJAX

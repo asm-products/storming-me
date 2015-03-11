@@ -10,9 +10,9 @@ block content
     .row.header
       .col-lg-8
         h2.form-signin-heading Settings
-      
+
         .alert.alert-success.hide#success-alert(role="alert") Settings successfully saved!
-        .alert.alert-error.hide#error-alert(role="alert")
+        .alert.alert-danger.hide#error-alert(role="alert")
 
         form#settings-form
           .form-group
@@ -25,15 +25,12 @@ block content
 
           .checkbox
             label
-              input(type='checkbox', name='alert_when_friends_join', checked=(user.alert_when_follow ? "checked" : undefined))
+              input(type='checkbox', name='alert_when_friends_join', checked=(user.alert_when_friends_join ? "checked" : undefined))
               |  Alert me when a friend joins
           .checkbox
             label
               input(type='checkbox', name='alert_when_follow', checked=(user.alert_when_follow ? "checked" : undefined))
-              |  Alert me when someone follows me 
+              |  Alert me when someone follows me
           button.btn.btn-default.save-settings-button(type='submit') Save my settings
-  
+
   include footer
-  
-  
-  
