@@ -191,7 +191,7 @@ router.post('/settings', isAuthenticated, function(req, res) {
   }
 
   // make sure new username is available
-  User.findOne({ $or: [ { username : new_username }, { old_username : new_username } ]}, function(err, existingUser) {
+  Users.findOne({ $or: [ { username : new_username }, { old_username : new_username } ]}, function(err, existingUser) {
     if (err) {
       return res.json({errors: ['Something went wrong.']});
     }
