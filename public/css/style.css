@@ -36,7 +36,7 @@ body {
 
 .secondary-text-color {
   color: #717171;
-} 
+}
 
 .light-gray {
   color: #b6b6b6;
@@ -189,4 +189,13 @@ a:hover {
 
 .bottom-margin{
     margin-bottom:2em;
+}
+
+img.asm-flag {
+  height:14px;
+  margin:-4px 4px 0 0;
+}
+
+.signin-button {
+  margin-top:1.5em;
 }
